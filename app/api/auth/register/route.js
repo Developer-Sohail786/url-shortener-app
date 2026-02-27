@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import  bcrypt  from "bcryptjs";
 import clientPromise from "@/lib/mongodb";
 import { NextResponse } from "next/server";
