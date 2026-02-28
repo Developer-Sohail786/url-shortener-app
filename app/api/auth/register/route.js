@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import  bcrypt  from "bcryptjs";
-import clientPromise from "@/lib/mongodb";
+import getClient from "@/lib/mongodb"
 import { NextResponse } from "next/server";
 
 export async function POST(req){
@@ -14,7 +14,7 @@ export async function POST(req){
                 )
             }
         const normalizedEmail=email.toLowerCase()
-        const client =await clientPromise
+        const client = await getClient()
         const db=client.db("URL_Shorten")
         const users= db.collection("users")
 

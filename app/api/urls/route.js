@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server"
-import clientPromise from "@/lib/mongodb"
+import getClient from "@/lib/mongodb"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../auth/[...nextauth]/route"
 
@@ -15,7 +15,7 @@ export async function GET() {
     }
 
     const userId=session.user.id
-    const client = await clientPromise
+   const client = await getClient()
     const db = client.db("URL_Shorten")
 
     

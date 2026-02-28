@@ -4,9 +4,9 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
-import clientPromise from "@/lib/mongodb";
+import getClient from "@/lib/mongodb"
 
-export const authOptions = {
+export  const authOptions = {
   session: {
     strategy: "jwt",
   },
@@ -26,7 +26,7 @@ export const authOptions = {
           throw new Error("Missing credentials");
         }
 
-        const client = await clientPromise;
+        const client = await getClient()
         const db = client.db("URL_Shorten");
         const users = db.collection("users");
 
