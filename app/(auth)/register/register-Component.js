@@ -2,12 +2,12 @@
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter,useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react"
 
 const Register = () => {
   const router = useRouter()
-   const searchParams = useSearchParams()
+  const searchParams = useSearchParams()
   const callbackUrl = searchParams.get("callbackUrl") || "/login"
   const [serverError, setserverError] = useState("")
   const {
@@ -18,28 +18,32 @@ const Register = () => {
 
   const onSubmit = async (data) => {
     setserverError("")
-    const res = await fetch("api/auth/register", {
+    const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     })
 
 
+    const result1 = await res.json();
+
+    if (!res.ok) {
+      setserverError(result1.message || "Registration failed");
+      return;
+    }
+
     const result = await signIn("credentials", {
       email: data.email,
       password: data.password,
-      redirect: false
-    })
+      redirect: false,
+    });
+
     if (result?.error) {
-      setserverError("User not registered")
-      return
+      setserverError("Login failed after registration");
+      return;
     }
+
     router.replace(callbackUrl);
-    const result1 = await res.json()
-    if (!res.ok) {
-      setserverError(result1.message || "Registration failed")
-      return
-    }
 
 
 
