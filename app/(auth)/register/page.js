@@ -1,5 +1,5 @@
 export const dynamic = "force-dynamic";
 
 export default function Page() {
-  return <h1>HELLO FROM SERVER</h1>;
+  return <h1>HELLO FROM SERVER hii</h1>;
 }
