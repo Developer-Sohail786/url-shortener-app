@@ -61,7 +61,7 @@ export  const authOptions = {
   callbacks: {
     async signIn({ user, account }) {
       if (account.provider === "google") {
-        const client = await clientPromise;
+        const client = await getClient()
         const db = client.db("URL_Shorten");
         const users = db.collection("users");
 
@@ -80,7 +80,7 @@ export  const authOptions = {
 
     async jwt({ token, user, account }) {
       if (account?.provider === "google") {
-        const client = await clientPromise;
+        const client = await getClient()
         const db = client.db("URL_Shorten");
 
         const existingUser = await db

@@ -1,10 +1,10 @@
 import { redirect, notFound } from "next/navigation";
-import clientPromise from "@/lib/mongodb";
+import getClient from "@/lib/mongodb";
 
 export default async function ShortUrlPage({ params }) {
  const { shorturl } = await params;
 
-    const client = await clientPromise;
+   const client = await getClient();
     const db = client.db("URL_Shorten");
     const collection = db.collection("url");
 
