@@ -1,5 +1,10 @@
 export const dynamic = "force-dynamic";
 
-export default function Page() {
-  return <h1>HELLO FROM SERVER hii</h1>;
+import { Suspense } from "react";
+import Register from "./register-Component";
+
+export default function Page(){
+  <Suspense>
+    <Register/>
+  </Suspense>
 }
