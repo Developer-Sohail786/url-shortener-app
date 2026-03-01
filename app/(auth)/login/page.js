@@ -1,7 +1,8 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import Login from "./login-component";
+import Login from "./loginComponent";
+
 
 export const dynamic = "force-dynamic";
 
