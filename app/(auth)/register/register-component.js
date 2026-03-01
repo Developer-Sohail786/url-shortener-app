@@ -8,7 +8,7 @@ import { signIn } from "next-auth/react"
 const Register = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get("callbackUrl") || "/login"
+  const callbackUrl = searchParams.get("callbackUrl") || "/shorten"
   const [serverError, setserverError] = useState("")
   const {
     register: registerField, // rename to avoid conflict
@@ -43,11 +43,11 @@ const Register = () => {
       return;
     }
 
-    router.replace(callbackUrl);
+    router.replace("/shorten");
 
 
 
-    router.push("/login")
+    // router.push("/login")
   }
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f3e8ff] px-4">
