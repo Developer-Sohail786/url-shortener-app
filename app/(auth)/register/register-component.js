@@ -47,7 +47,7 @@ const Register = () => {
 
 
 
-    // router.push("/login")
+    
   }
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f3e8ff] px-4">
