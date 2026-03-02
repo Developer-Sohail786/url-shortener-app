@@ -139,29 +139,29 @@ const deleteURL = async (id) => {
       </div>
 
       {/* Table */}
-     <div className="px-4">
+    <div className="px-4">
   <h2 className="text-xl font-bold text-center mb-4">
     Generated URLs
   </h2>
 
-  <div className="w-full overflow-x-auto rounded-lg shadow">
-    <table className="min-w-200 w-full border border-gray-300 text-sm sm:text-base">
+  <div className="w-full overflow-x-auto">
+    <table className="w-full border border-gray-300 text-sm sm:text-base table-auto">
       
       <thead className="bg-purple-100 text-purple-900">
         <tr>
-          <th className="border px-3 sm:px-4 py-2 text-left whitespace-nowrap">
+          <th className="border px-3 py-2 text-left">
             Original URL
           </th>
-          <th className="border px-3 sm:px-4 py-2 text-left whitespace-nowrap">
+          <th className="border px-3 py-2 text-left">
             Short URL
           </th>
-          <th className="border px-3 sm:px-4 py-2 text-center whitespace-nowrap">
+          <th className="border px-3 py-2 text-center">
             Clicks
           </th>
-          <th className="border px-3 sm:px-4 py-2 text-center whitespace-nowrap">
+          <th className="border px-3 py-2 text-center">
             Created
           </th>
-          <th className="border px-3 sm:px-4 py-2 text-center whitespace-nowrap">
+          <th className="border px-3 py-2 text-center">
             Action
           </th>
         </tr>
@@ -179,18 +179,18 @@ const deleteURL = async (id) => {
             <tr key={item._id} className="hover:bg-gray-50 transition">
 
               {/* Original URL */}
-              <td className="border px-3 sm:px-4 py-2 truncate max-w-62.5 align-middle">
+              <td className="border px-3 py-2 wrap-break-word">
                 {item.url}
               </td>
 
               {/* Short URL */}
-              <td className="border px-3 sm:px-4 py-2 align-middle">
-                <div className="flex items-center gap-2">
+              <td className="border px-3 py-2">
+                <div className="flex flex-wrap items-center gap-2 wrap-break-word">
                   <a
                     href={`/${item.shorturl}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-purple-600 underline break-all"
+                    className="text-purple-600 underline wrap-break-word"
                   >
                     {process.env.NEXT_PUBLIC_HOST}/{item.shorturl}
                   </a>
@@ -234,17 +234,17 @@ const deleteURL = async (id) => {
               </td>
 
               {/* Clicks */}
-              <td className="border px-3 sm:px-4 py-2 text-center font-semibold align-middle">
+              <td className="border px-3 py-2 text-center font-semibold">
                 {item.clicks ?? 0}
               </td>
 
               {/* Created */}
-              <td className="border px-3 sm:px-4 py-2 text-center text-xs sm:text-sm align-middle">
+              <td className="border px-3 py-2 text-center text-xs sm:text-sm">
                 {new Date(item.createdAt).toLocaleDateString()}
               </td>
 
               {/* Action */}
-              <td className="border px-3 sm:px-4 py-2 text-center align-middle">
+              <td className="border px-3 py-2 text-center">
                 <button
                   onClick={() => deleteURL(item._id)}
                   className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
