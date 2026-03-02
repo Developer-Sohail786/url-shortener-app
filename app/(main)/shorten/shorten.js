@@ -22,9 +22,21 @@ const Shorten = () => {
     }
   };
 
-  useEffect(() => {
+ useEffect(() => {
+  fetchUrls();
+}, []);
+
+useEffect(() => {
+  const handleFocus = () => {
     fetchUrls();
-  }, []);
+  };
+
+  window.addEventListener("focus", handleFocus);
+
+  return () => {
+    window.removeEventListener("focus", handleFocus);
+  };
+}, []);
   const handleChange = (e) => {
   seturl(e.target.value);
 };
@@ -127,97 +139,128 @@ const deleteURL = async (id) => {
       </div>
 
       {/* Table */}
-      <div className="px-4">
-        <h2 className="text-xl font-bold text-center mb-4">
-          Generated URLs
-        </h2>
+     <div className="px-4">
+  <h2 className="text-xl font-bold text-center mb-4">
+    Generated URLs
+  </h2>
 
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-150 border border-gray-300">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="border px-4 py-2 text-left">Original URL</th>
-                <th className="border px-4 py-2 text-left">Short URL</th>
-                <th className="border px-4 py-2 text-center">Action</th>
-              </tr>
-            </thead>
+  <div className="w-full overflow-x-auto rounded-lg shadow">
+    <table className="min-w-200 w-full border border-gray-300 text-sm sm:text-base">
+      
+      <thead className="bg-purple-100 text-purple-900">
+        <tr>
+          <th className="border px-3 sm:px-4 py-2 text-left whitespace-nowrap">
+            Original URL
+          </th>
+          <th className="border px-3 sm:px-4 py-2 text-left whitespace-nowrap">
+            Short URL
+          </th>
+          <th className="border px-3 sm:px-4 py-2 text-center whitespace-nowrap">
+            Clicks
+          </th>
+          <th className="border px-3 sm:px-4 py-2 text-center whitespace-nowrap">
+            Created
+          </th>
+          <th className="border px-3 sm:px-4 py-2 text-center whitespace-nowrap">
+            Action
+          </th>
+        </tr>
+      </thead>
 
-            <tbody>
-              {urls.length === 0 ? (
-                <tr>
-                  <td colSpan="3" className="text-center py-4">
-                    Generate your URL
-                  </td>
-                </tr>
-              ) : (
-                urls.map((item) => (
-                  <tr key={item._id}>
-                    <td className="border px-4 py-2 break-all">
-                      {item.url}
-                    </td>
+      <tbody>
+        {urls.length === 0 ? (
+          <tr>
+            <td colSpan="5" className="text-center py-6 text-gray-500">
+              Generate your first URL
+            </td>
+          </tr>
+        ) : (
+          urls.map((item) => (
+            <tr key={item._id} className="hover:bg-gray-50 transition">
 
-                    <td className="border px-4 py-2 break-all flex items-center gap-2">
-                      <a
-                        href={`/${item.shorturl}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-purple-600 underline"
+              {/* Original URL */}
+              <td className="border px-3 sm:px-4 py-2 truncate max-w-62.5 align-middle">
+                {item.url}
+              </td>
+
+              {/* Short URL */}
+              <td className="border px-3 sm:px-4 py-2 align-middle">
+                <div className="flex items-center gap-2">
+                  <a
+                    href={`/${item.shorturl}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-purple-600 underline break-all"
+                  >
+                    {process.env.NEXT_PUBLIC_HOST}/{item.shorturl}
+                  </a>
+
+                  <button
+                    onClick={() => copyToClipboard(item.shorturl)}
+                    className="p-1 rounded hover:bg-gray-200 transition"
+                  >
+                    {copiedId === item.shorturl ? (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="green"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       >
-                        {process.env.NEXT_PUBLIC_HOST}/{item.shorturl}
-                      </a>
-
-                      <button
-                        onClick={() => copyToClipboard(item.shorturl)}
-                        className="p-1 rounded hover:bg-gray-200 transition"
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       >
-                        {copiedId === item.shorturl ? (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="green"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <polyline points="20 6 9 17 4 12" />
-                          </svg>
-                        ) : (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <rect x="9" y="9" width="13" height="13" rx="2" />
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                          </svg>
-                        )}
-                      </button>
-                    </td>
+                        <rect x="9" y="9" width="13" height="13" rx="2" />
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </td>
 
-                    <td className="border px-4 py-2 text-center">
-                      <button
-                        onClick={() => deleteURL(item._id)}
-                        className="bg-red-500 text-white px-3 py-1 rounded cursor-pointer hover:bg-red-600"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+              {/* Clicks */}
+              <td className="border px-3 sm:px-4 py-2 text-center font-semibold align-middle">
+                {item.clicks ?? 0}
+              </td>
+
+              {/* Created */}
+              <td className="border px-3 sm:px-4 py-2 text-center text-xs sm:text-sm align-middle">
+                {new Date(item.createdAt).toLocaleDateString()}
+              </td>
+
+              {/* Action */}
+              <td className="border px-3 sm:px-4 py-2 text-center align-middle">
+                <button
+                  onClick={() => deleteURL(item._id)}
+                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
+                >
+                  Delete
+                </button>
+              </td>
+
+            </tr>
+          ))
+        )}
+      </tbody>
+
+    </table>
+  </div>
+</div>
     </>
   );
 

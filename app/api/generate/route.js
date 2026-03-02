@@ -44,7 +44,8 @@ export async function POST(req) {
       shorturl,
       clicks: 0,
       userId,
-      createdAt: new Date()
+      createdAt: new Date(),
+      lastClickedAt: null
     })
 
     

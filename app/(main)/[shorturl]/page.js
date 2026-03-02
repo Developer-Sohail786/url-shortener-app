@@ -2,21 +2,25 @@ import { redirect, notFound } from "next/navigation";
 import getClient from "@/lib/mongodb";
 
 export default async function ShortUrlPage({ params }) {
- const { shorturl } = await params;
+  const { shorturl } = await params;
+ 
+  
 
-   const client = await getClient();
-    const db = client.db("URL_Shorten");
-    const collection = db.collection("url");
+  const client = await getClient();
+  const db = client.db("URL_Shorten");
+  const collection = db.collection("url");
 
-    const doc = await collection.findOne({ shorturl });
+  const doc = await collection.findOne({ shorturl });
+  
 
-    if (!doc || !doc.url.startsWith("http")) {
-      notFound();
-    }
+  if (!doc || !doc.url.startsWith("http")) {
+    notFound();
+  }
 
-    await collection.updateOne(
-      { shorturl },
-      { $inc: { clicks: 1 } }
-    );
+ const result = await collection.updateOne(
+  { _id: doc._id },
+  { $inc: { clicks: 1 } }
+);
+
   redirect(doc.url);
 }
