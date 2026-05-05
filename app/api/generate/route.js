@@ -15,7 +15,7 @@ export async function POST(req) {
     }
 
     const userId=session.user.id
-    const { url, shorturl } = await req.json()
+    const { url, shorturl, summary } = await req.json()
 
     
     if (!url || !shorturl) {
@@ -42,6 +42,7 @@ export async function POST(req) {
     await db.collection("url").insertOne({
       url,
       shorturl,
+      summary,
       clicks: 0,
       userId,
       createdAt: new Date(),

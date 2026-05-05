@@ -11,6 +11,7 @@ const Shorten = () => {
   const [error, seterror] = useState("");
   const [loading, setloading] = useState(false);
   const [copiedId, setcopiedId] = useState(null);
+  const [aiSummary, setAiSummary]=useState("")
 
   const fetchUrls = async () => {
     try {
@@ -53,7 +54,7 @@ const generate = async () => {
     const res = await fetch("/api/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url, shorturl }),
+      body: JSON.stringify({ url, shorturl, summary: aiSummary }),
     });
 
     const result = await res.json();
@@ -64,6 +65,7 @@ const generate = async () => {
       seturl("");
       setshorturl("");
       fetchUrls();
+      setAiSummary("")
     }
   } catch {
     seterror("Something went wrong");
@@ -91,6 +93,29 @@ const deleteURL = async (id) => {
     setcopiedId(shorturl);
     setTimeout(() => setcopiedId(null), 1500);
   };
+
+  const handeleAISuggest= async()=>{
+    if(!url) return
+    try {
+      const res= await fetch("/api/ai-generate",{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body: JSON.stringify({ url, shorturl, summary: aiSummary }),
+      })
+      const data= await res.json()
+
+      if(data.success){
+        setshorturl(data.slug)
+        setAiSummary(data.summary || "Generated with AI")
+        }
+       
+    } catch (error) {
+      console.error("AI error");
+      
+    }
+  }
 
   return (
     <>
@@ -120,6 +145,9 @@ const deleteURL = async (id) => {
           {error && (
             <p className="text-red-600 text-sm text-center">{error}</p>
           )}
+          <div className="flex justify-center">
+            <button type="button" onClick={handeleAISuggest} className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 text-sm cursor-pointer">AI Suggest</button>
+          </div>
 
           <div className="flex justify-center">
             <button
@@ -155,6 +183,9 @@ const deleteURL = async (id) => {
           <th className="border px-3 py-2 text-left">
             Short URL
           </th>
+          <th className="border px-3 py-2 text-left">
+            Summary
+          </th>
           <th className="border px-3 py-2 text-center">
             Clicks
           </th>
@@ -170,7 +201,7 @@ const deleteURL = async (id) => {
       <tbody>
         {urls.length === 0 ? (
           <tr>
-            <td colSpan="5" className="text-center py-6 text-gray-500">
+            <td colSpan="6" className="text-center py-6 text-gray-500">
               Generate your first URL
             </td>
           </tr>
@@ -232,6 +263,7 @@ const deleteURL = async (id) => {
                   </button>
                 </div>
               </td>
+              <td className="border px-3 py-2 wrap-break-word max-w-50">{item.summary?item.summary: "-"}</td>
 
               {/* Clicks */}
               <td className="border px-3 py-2 text-center font-semibold">
@@ -247,7 +279,7 @@ const deleteURL = async (id) => {
               <td className="border px-3 py-2 text-center">
                 <button
                   onClick={() => deleteURL(item._id)}
-                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
+                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition cursor-pointer"
                 >
                   Delete
                 </button>
