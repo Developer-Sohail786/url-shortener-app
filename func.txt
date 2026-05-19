@@ -1,1 +1,2 @@
 1.Model Fallback feature
+2.add gemini api in vercel

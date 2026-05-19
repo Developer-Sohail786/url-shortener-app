@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import Image from "next/image";
+import { toast } from "react-toastify";
 
 const Shorten = () => {
   const [url, seturl] = useState("");
@@ -11,7 +10,8 @@ const Shorten = () => {
   const [error, seterror] = useState("");
   const [loading, setloading] = useState(false);
   const [copiedId, setcopiedId] = useState(null);
-  const [aiSummary, setAiSummary]=useState("")
+  const [aiSummary, setAiSummary] = useState("")
+  const [aiLoading, setAiLoading] = useState(false)
 
   const fetchUrls = async () => {
     try {
@@ -23,69 +23,69 @@ const Shorten = () => {
     }
   };
 
- useEffect(() => {
-  fetchUrls();
-}, []);
-
-useEffect(() => {
-  const handleFocus = () => {
+  useEffect(() => {
     fetchUrls();
-  };
+  }, []);
 
-  window.addEventListener("focus", handleFocus);
-
-  return () => {
-    window.removeEventListener("focus", handleFocus);
-  };
-}, []);
-  const handleChange = (e) => {
-  seturl(e.target.value);
-};
-
-const handleChange1 = (e) => {
-  setshorturl(e.target.value);
-};
-const generate = async () => {
-  if (loading) return;
-  setloading(true);
-  seterror("");
-
-  try {
-    const res = await fetch("/api/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url, shorturl, summary: aiSummary }),
-    });
-
-    const result = await res.json();
-
-    if (!result.success) {
-      seterror(result.message);
-    } else {
-      seturl("");
-      setshorturl("");
+  useEffect(() => {
+    const handleFocus = () => {
       fetchUrls();
-      setAiSummary("")
-    }
-  } catch {
-    seterror("Something went wrong");
-  } finally {
-    setloading(false);
-  }
-};
+    };
 
-const deleteURL = async (id) => {
-  try {
-    await fetch("/api/delete", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-    });
-    fetchUrls();
-  } catch {
-    console.error("Delete failed");
-  }
-};
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, []);
+  const handleChange = (e) => {
+    seturl(e.target.value);
+  };
+
+  const handleChange1 = (e) => {
+    setshorturl(e.target.value);
+  };
+  const generate = async () => {
+    if (loading) return;
+    setloading(true);
+    seterror("");
+
+    try {
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+
+      const result = await res.json();
+
+      if (!result.success) {
+        seterror(result.message);
+      } else {
+        seturl("");
+        setshorturl("");
+        fetchUrls();
+        setAiSummary("")
+      }
+    } catch {
+      seterror("Something went wrong");
+    } finally {
+      setloading(false);
+    }
+  };
+
+  const deleteURL = async (id) => {
+    try {
+      await fetch("/api/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      fetchUrls();
+    } catch {
+      console.error("Delete failed");
+    }
+  };
 
   const copyToClipboard = async (shorturl) => {
     const fullUrl = `${process.env.NEXT_PUBLIC_HOST}/${shorturl}`;
@@ -94,26 +94,39 @@ const deleteURL = async (id) => {
     setTimeout(() => setcopiedId(null), 1500);
   };
 
-  const handeleAISuggest= async()=>{
-    if(!url) return
+  const handeleAISuggest = async () => {
+    if (!url) return
+    setAiLoading(true)
     try {
-      const res= await fetch("/api/ai-generate",{
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json"
+      const res = await fetch("/api/ai-generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({ url, shorturl, summary: aiSummary }),
       })
-      const data= await res.json()
+      const data = await res.json()
 
-      if(data.success){
+      if (data.success) {
         setshorturl(data.slug)
         setAiSummary(data.summary || "Generated with AI")
+      }
+      else {
+        toast.error(data.message || "AI is unavailable right now due to high traffic");
+
+        // fallback data
+        if (data.fallback) {
+          setshorturl(data.fallback.slug);
+          setAiSummary(data.fallback.summary);
         }
-       
+      }
+
     } catch (error) {
-      console.error("AI error");
-      
+
+
+      toast.error("AI is unavailable right now due to high traffic, Please try again later");
+    } finally {
+      setAiLoading(false);
     }
   }
 
@@ -146,7 +159,18 @@ const deleteURL = async (id) => {
             <p className="text-red-600 text-sm text-center">{error}</p>
           )}
           <div className="flex justify-center">
-            <button type="button" onClick={handeleAISuggest} className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 text-sm cursor-pointer">AI Suggest</button>
+            <button
+              type="button"
+              onClick={handeleAISuggest}
+              disabled={aiLoading}
+              className={`px-4 py-2 rounded text-sm cursor-pointer transition
+  ${aiLoading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-gray-300 hover:bg-gray-400"
+                }`}
+            >
+              {aiLoading ? "AI Thinking..." : "AI Suggest"}
+            </button>
           </div>
 
           <div className="flex justify-center">
@@ -167,132 +191,132 @@ const deleteURL = async (id) => {
       </div>
 
       {/* Table */}
-    <div className="px-4">
-  <h2 className="text-xl font-bold text-center mb-4">
-    Generated URLs
-  </h2>
+      <div className="px-4">
+        <h2 className="text-xl font-bold text-center mb-4">
+          Generated URLs
+        </h2>
 
-  <div className="w-full overflow-x-auto">
-    <table className="w-full border border-gray-300 text-sm sm:text-base table-auto">
-      
-      <thead className="bg-purple-100 text-purple-900">
-        <tr>
-          <th className="border px-3 py-2 text-left">
-            Original URL
-          </th>
-          <th className="border px-3 py-2 text-left">
-            Short URL
-          </th>
-          <th className="border px-3 py-2 text-left">
-            Summary
-          </th>
-          <th className="border px-3 py-2 text-center">
-            Clicks
-          </th>
-          <th className="border px-3 py-2 text-center">
-            Created
-          </th>
-          <th className="border px-3 py-2 text-center">
-            Action
-          </th>
-        </tr>
-      </thead>
+        <div className="w-full overflow-x-auto">
+          <table className="w-full border border-gray-300 text-sm sm:text-base table-auto">
 
-      <tbody>
-        {urls.length === 0 ? (
-          <tr>
-            <td colSpan="6" className="text-center py-6 text-gray-500">
-              Generate your first URL
-            </td>
-          </tr>
-        ) : (
-          urls.map((item) => (
-            <tr key={item._id} className="hover:bg-gray-50 transition">
+            <thead className="bg-purple-100 text-purple-900">
+              <tr>
+                <th className="border px-3 py-2 text-left">
+                  Original URL
+                </th>
+                <th className="border px-3 py-2 text-left">
+                  Short URL
+                </th>
+                <th className="border px-3 py-2 text-left">
+                  Summary
+                </th>
+                <th className="border px-3 py-2 text-center">
+                  Clicks
+                </th>
+                <th className="border px-3 py-2 text-center">
+                  Created
+                </th>
+                <th className="border px-3 py-2 text-center">
+                  Action
+                </th>
+              </tr>
+            </thead>
 
-              {/* Original URL */}
-              <td className="border px-3 py-2 wrap-break-word">
-                {item.url}
-              </td>
+            <tbody>
+              {urls.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="text-center py-6 text-gray-500">
+                    Generate your first URL
+                  </td>
+                </tr>
+              ) : (
+                urls.map((item) => (
+                  <tr key={item._id} className="hover:bg-gray-50 transition">
 
-              {/* Short URL */}
-              <td className="border px-3 py-2">
-                <div className="flex flex-wrap items-center gap-2 wrap-break-word">
-                  <a
-                    href={`/${item.shorturl}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-purple-600 underline wrap-break-word"
-                  >
-                    {process.env.NEXT_PUBLIC_HOST}/{item.shorturl}
-                  </a>
+                    {/* Original URL */}
+                    <td className="border px-3 py-2 wrap-break-word">
+                      {item.url}
+                    </td>
 
-                  <button
-                    onClick={() => copyToClipboard(item.shorturl)}
-                    className="p-1 rounded hover:bg-gray-200 transition"
-                  >
-                    {copiedId === item.shorturl ? (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="green"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                    {/* Short URL */}
+                    <td className="border px-3 py-2">
+                      <div className="flex flex-wrap items-center gap-2 wrap-break-word">
+                        <a
+                          href={`/${item.shorturl}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-purple-600 underline wrap-break-word"
+                        >
+                          {process.env.NEXT_PUBLIC_HOST}/{item.shorturl}
+                        </a>
+
+                        <button
+                          onClick={() => copyToClipboard(item.shorturl)}
+                          className="p-1 rounded hover:bg-gray-200 transition"
+                        >
+                          {copiedId === item.shorturl ? (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="18"
+                              height="18"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="green"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                          ) : (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="18"
+                              height="18"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <rect x="9" y="9" width="13" height="13" rx="2" />
+                              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                            </svg>
+                          )}
+                        </button>
+                      </div>
+                    </td>
+                    <td className="border px-3 py-2 wrap-break-word max-w-50">{item.summary ? item.summary : "-"}</td>
+
+                    {/* Clicks */}
+                    <td className="border px-3 py-2 text-center font-semibold">
+                      {item.clicks ?? 0}
+                    </td>
+
+                    {/* Created */}
+                    <td className="border px-3 py-2 text-center text-xs sm:text-sm">
+                      {new Date(item.createdAt).toLocaleDateString()}
+                    </td>
+
+                    {/* Action */}
+                    <td className="border px-3 py-2 text-center">
+                      <button
+                        onClick={() => deleteURL(item._id)}
+                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition cursor-pointer"
                       >
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    ) : (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <rect x="9" y="9" width="13" height="13" rx="2" />
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-              </td>
-              <td className="border px-3 py-2 wrap-break-word max-w-50">{item.summary?item.summary: "-"}</td>
+                        Delete
+                      </button>
+                    </td>
 
-              {/* Clicks */}
-              <td className="border px-3 py-2 text-center font-semibold">
-                {item.clicks ?? 0}
-              </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
 
-              {/* Created */}
-              <td className="border px-3 py-2 text-center text-xs sm:text-sm">
-                {new Date(item.createdAt).toLocaleDateString()}
-              </td>
-
-              {/* Action */}
-              <td className="border px-3 py-2 text-center">
-                <button
-                  onClick={() => deleteURL(item._id)}
-                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition cursor-pointer"
-                >
-                  Delete
-                </button>
-              </td>
-
-            </tr>
-          ))
-        )}
-      </tbody>
-
-    </table>
-  </div>
-</div>
+          </table>
+        </div>
+      </div>
     </>
   );
 
