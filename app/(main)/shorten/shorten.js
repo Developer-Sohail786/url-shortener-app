@@ -56,7 +56,11 @@ const Shorten = () => {
         
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
+       body: JSON.stringify({
+  url,
+  shorturl,
+  summary: aiSummary,
+}),
       });
 
       const result = await res.json();
@@ -103,40 +107,43 @@ const Shorten = () => {
   };
 
   const handeleAISuggest = async () => {
-    if (!url) return
-    setAiLoading(true)
-    try {
-      const res = await fetch("/api/ai-generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ url, shorturl, summary: aiSummary }),
-      })
-      const data = await res.json()
+  if (!url) return;
 
-      if (data.success) {
-        setshorturl(data.slug)
-        setAiSummary(data.summary || "Generated with AI")
+  setAiLoading(true);
+
+  try {
+    const res = await fetch("/api/ai-generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ url }),
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      setshorturl(data.slug);
+      setAiSummary(data.summary || "Generated with AI");
+    } else {
+      toast.error(
+        data.message || "AI is unavailable right now due to high traffic"
+      );
+
+      // fallback data
+      if (data.fallback) {
+        setshorturl(data.fallback.slug);
+        setAiSummary(data.fallback.summary);
       }
-      else {
-        toast.error(data.message || "AI is unavailable right now due to high traffic");
-
-        // fallback data
-        if (data.fallback) {
-          setshorturl(data.fallback.slug);
-          setAiSummary(data.fallback.summary);
-        }
-      }
-
-    } catch (error) {
-
-
-      toast.error("AI is unavailable right now due to high traffic, Please try again later");
-    } finally {
-      setAiLoading(false);
     }
+  } catch (error) {
+    toast.error(
+      "AI is unavailable right now due to high traffic. Please try again later."
+    );
+  } finally {
+    setAiLoading(false);
   }
+};
 
   return (
     <>
