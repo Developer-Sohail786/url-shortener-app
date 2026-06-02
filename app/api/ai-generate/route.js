@@ -132,7 +132,7 @@ Slug:
 
         return NextResponse.json({
             success: false,
-            message: "AI failed"
+            message: "AI is unavailable right now due to high traffic, please try again later"
         })
     }
 }

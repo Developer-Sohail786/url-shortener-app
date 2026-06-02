@@ -52,6 +52,8 @@ const Shorten = () => {
 
     try {
       const res = await fetch("/api/generate", {
+        
+        
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),
@@ -61,6 +63,12 @@ const Shorten = () => {
 
       if (!result.success) {
         seterror(result.message);
+       console.log({
+  url,
+  shorturl,
+  aiSummary
+})
+        
       } else {
         seturl("");
         setshorturl("");
